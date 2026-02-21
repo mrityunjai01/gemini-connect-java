@@ -1,22 +1,23 @@
 package com.queueco.app;
 
-/**
- * Hello world!
- *
- */
-public class App 
-{
-    public static void main( String[] args )
-    {
-        System.out.println( "Hello World!" );
-        WebSocketClient client = new StandardWebSocketClient();
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 
-        WebSocketStompClient stompClient = new WebSocketStompClient(client);
-        stompClient.setMessageConverter(new MappingJackson2MessageConverter());
+import com.queueco.app.v1.Handler;
+import com.queueco.app.v1.WebsocketClientConfig;
 
-        StompSessionHandler sessionHandler = new MyStompSessionHandler();
-        stompClient.connect(URL, sessionHandler);
+@ComponentScan
+public class App {
+    public static void main(String[] args) {
+        try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+                WebsocketClientConfig.class, Handler.class)) {
 
-        new Scanner(System.in).nextLine(); // Don't close immediately.
+            Object webSocketManager = ctx.getBean("WebSocketConnectionManagerV1");
+            Thread.currentThread().join();
+
+        } catch (Exception exception) {
+
+        }
+
     }
 }
