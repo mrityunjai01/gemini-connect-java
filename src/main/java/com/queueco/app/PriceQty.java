@@ -4,6 +4,11 @@ import java.math.BigDecimal;
 
 public class PriceQty {
     private BigDecimal price, qty;
+    private boolean ask;
+
+    public boolean isAsk() {
+        return ask;
+    }
 
     public BigDecimal getPrice() {
         return price;
@@ -24,9 +29,10 @@ public class PriceQty {
     public PriceQty() {
     }
 
-    public PriceQty(BigDecimal price, BigDecimal qty) {
+    public PriceQty(BigDecimal price, BigDecimal qty, boolean ask) {
         this.price = price;
         this.qty = qty;
+        this.ask = ask;
     }
 
 }
