@@ -2,6 +2,7 @@ package com.queueco.app.v2;
 
 import java.util.Iterator;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.TextMessage;
@@ -16,6 +17,7 @@ import com.queueco.app.schemas.v2.Subscription;
 
 import tools.jackson.databind.ObjectMapper;
 
+@Lazy
 @Component("HandlerV2")
 public class Handler extends TextWebSocketHandler {
     private OrderBook orderBook;
