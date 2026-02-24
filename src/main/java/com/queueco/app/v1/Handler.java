@@ -1,7 +1,9 @@
 package com.queueco.app.v1;
 
+import java.util.Iterator;
 import java.util.Optional;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -11,6 +13,7 @@ import com.queueco.app.OrderBook;
 import com.queueco.app.PriceQty;
 import com.queueco.app.schemas.v1.ChangeMessageParser;
 
+@Lazy
 @Component("HandlerV1")
 public class Handler extends TextWebSocketHandler {
     private OrderBook orderBook;
@@ -24,25 +27,28 @@ public class Handler extends TextWebSocketHandler {
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
-        Iterable<PriceQty> priceUpdates = this.messageParser.parseMessage(message.getPayload());
-        for (PriceQty pq : priceUpdates) {
+        // the initial nmessage takes some time to process but after the initial one,
+        // the updates are short messages
+        Iterator<PriceQty> priceUpdates = this.messageParser.parseMessage(message.getPayload());
+        while (priceUpdates.hasNext()) {
+            PriceQty pq = priceUpdates.next();
             if (pq.isAsk()) {
-                orderBook.updateAsk(pq.getPrice(), pq.getQty());
+                this.orderBook.updateAsk(pq.getPrice(), pq.getQty());
             } else {
-                orderBook.updateBid(pq.getPrice(), pq.getQty());
+                this.orderBook.updateBid(pq.getPrice(), pq.getQty());
             }
         }
 
-        Optional<PriceQty> best_bid = orderBook.getBestBid();
-        Optional<PriceQty> best_ask = orderBook.getBestAsk();
+        if (this.orderBook.consume_update()) {
+            Optional<PriceQty> best_bid = orderBook.getBestBid();
+            Optional<PriceQty> best_ask = orderBook.getBestAsk();
 
-        if (best_bid.isPresent() && best_ask.isPresent()) {
-            System.out.println(String.format("%s %s - %s %s", best_bid.get().getPrice(), best_bid.get().getQty(),
-                    best_ask.get().getPrice(), best_ask.get().getQty()));
+            if (best_bid.isPresent() && best_ask.isPresent()) {
+                System.out.println(String.format("%s %s - %s %s", best_bid.get().getPrice(), best_bid.get().getQty(),
+                        best_ask.get().getPrice(), best_ask.get().getQty()));
 
+            }
         }
-        // the initial nmessage takes some time to process but after the initial one,
-        // the updates are short messages
 
     }
 
