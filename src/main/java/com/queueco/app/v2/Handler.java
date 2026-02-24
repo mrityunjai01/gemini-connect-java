@@ -1,7 +1,5 @@
 package com.queueco.app.v2;
 
-import java.util.Iterator;
-
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.BinaryMessage;
@@ -9,9 +7,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import com.queueco.app.OrderBook;
-import com.queueco.app.PriceQty;
-import com.queueco.app.schemas.v1.ChangeMessageParser;
+import com.queueco.app.OrderBookInterface;
 import com.queueco.app.schemas.v2.InitialMessageSchema;
 import com.queueco.app.schemas.v2.Subscription;
 
@@ -20,13 +16,25 @@ import tools.jackson.databind.ObjectMapper;
 @Lazy
 @Component("HandlerV2")
 public class Handler extends TextWebSocketHandler {
-    private OrderBook orderBook;
+    private OrderBookInterface orderBook;
 
-    public Handler(OrderBook orderBook) {
+    /**
+     * Handler Constructor
+     *
+     * @param orderBook An orderbook instance
+     * @return A new handler
+     */
+    public Handler(OrderBookInterface orderBook) {
         super();
         this.orderBook = orderBook;
     }
 
+    /**
+     * Handle Text Messages, saving state in orderbook
+     *
+     * @param session websocket session
+     * @param message message decoded from utf-8
+     */
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
         // the initial nmessage takes some time to process but after the initial one,
@@ -34,6 +42,11 @@ public class Handler extends TextWebSocketHandler {
 
     }
 
+    /**
+     * Initial setup message
+     *
+     * @param session websocket session
+     */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         InitialMessageSchema initialMessage = new InitialMessageSchema(
@@ -44,5 +57,4 @@ public class Handler extends TextWebSocketHandler {
         session.sendMessage(new BinaryMessage(objectMapper.writeValueAsBytes(initialMessage)));
         super.afterConnectionEstablished(session);
     }
-
 }

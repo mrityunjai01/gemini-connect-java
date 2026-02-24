@@ -2,6 +2,9 @@ package com.queueco.app;
 
 import java.math.BigDecimal;
 
+/**
+ * Fairly simple price-quantity-side triplet
+ */
 public class PriceQty {
     private BigDecimal price, qty;
     private boolean isAsk;

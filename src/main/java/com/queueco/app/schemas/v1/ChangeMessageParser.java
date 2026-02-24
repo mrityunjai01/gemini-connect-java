@@ -16,11 +16,21 @@ import tools.jackson.core.ObjectReadContext;
 import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.json.JsonFactory;
 
+/**
+ * Parses change messages from v1 API.
+ * Ignores any messages which are not change based and logs them into an error
+ * log
+ */
 @Component
 public class ChangeMessageParser {
     private JsonFactory jsonFactory;
     private ArrayList<PriceQty> updates;
 
+    /**
+     * ChangeMessageParser Constructor
+     *
+     * @return ChangeMessageParser
+     */
     public ChangeMessageParser() {
         this.jsonFactory = JsonFactory.builder()
                 .enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
@@ -34,7 +44,15 @@ public class ChangeMessageParser {
         SIDE, PRICE, QTY
     }
 
+    /**
+     * Parses a string using json parser
+     * 
+     * @param message a json message with price updates
+     * @return iterator into an owned arraylist
+     *
+     */
     public Iterator<PriceQty> parseMessage(String message) {
+        updates.clear();
         BigDecimal price = BigDecimal.ZERO, qty = BigDecimal.ZERO;
         boolean isAsk = false;
         EnumSet<ParseState> parseState = EnumSet.noneOf(ParseState.class);

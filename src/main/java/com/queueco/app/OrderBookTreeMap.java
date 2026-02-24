@@ -15,6 +15,11 @@ public class OrderBookTreeMap implements OrderBookInterface {
     private Optional<PriceQty> best_bid, best_ask;
     private boolean consumable = false;
 
+    /**
+     * OrderBookTreeMap Constructor
+     *
+     * @return orderBook An OrderBookTreeMap instance
+     */
     public OrderBookTreeMap() {
         this.bids = new TreeMap<>();
         this.asks = new TreeMap<>();
@@ -22,6 +27,13 @@ public class OrderBookTreeMap implements OrderBookInterface {
         this.best_ask = Optional.empty();
     }
 
+    /**
+     * Update a bid
+     * 
+     * @param price price
+     * @param qty   size of the order
+     *
+     */
     public void updateBid(BigDecimal price, BigDecimal qty) { // the logic will be duplicated in updateAsk because I
         if (qty.compareTo(BigDecimal.ZERO) == 0) {
             this.bids.remove(price);
@@ -31,16 +43,31 @@ public class OrderBookTreeMap implements OrderBookInterface {
 
         if (this.best_bid.isEmpty() || price.compareTo(this.best_bid.get().getPrice()) >= 0) {
             Entry<BigDecimal, BigDecimal> bid = this.bids.pollLastEntry();
-            if (this.best_bid.isPresent()) {
+            if (this.best_bid.isPresent() && bid != null) {
                 if (this.best_bid.get().getPrice().compareTo(bid.getKey()) < 0
                         || this.best_bid.get().getQty().compareTo(bid.getValue()) != 0) {
                     this.consumable = true;
                 }
+            } else {
+                this.consumable = true;
             }
-            this.best_bid = Optional.of(new PriceQty(bid.getKey(), bid.getValue(), false)); // cache the best bid
+            if (bid != null) {
+
+                this.best_bid = Optional.of(new PriceQty(bid.getKey(), bid.getValue(), false)); // cache the best bid
+            } else {
+                this.best_bid = Optional.empty();
+
+            }
         }
     }
 
+    /**
+     * Update an Ask
+     * 
+     * @param price price
+     * @param qty   size of the order
+     *
+     */
     public void updateAsk(BigDecimal price, BigDecimal qty) { // the logic will be duplicated in updateAsk because I
         if (qty.compareTo(BigDecimal.ZERO) == 0) {
             this.asks.remove(price);
@@ -49,20 +76,30 @@ public class OrderBookTreeMap implements OrderBookInterface {
         }
         if (this.best_ask.isEmpty() || price.compareTo(this.best_ask.get().getPrice()) <= 0) {
             Entry<BigDecimal, BigDecimal> ask = this.asks.pollFirstEntry();
-            if (this.best_ask.isPresent()) {
+            if (this.best_ask.isPresent() && ask != null) {
                 if (this.best_ask.get().getPrice().compareTo(ask.getKey()) > 0
                         || this.best_ask.get().getQty().compareTo(ask.getValue()) != 0) {
                     this.consumable = true;
-                    // System.out.println("Consumable set to true becuase " +
-                    // this.best_ask.get().getPrice() + " "
-                    // + this.best_ask.get().getQty() + " instead of actual " + ask.getKey() + " "
-                    // + ask.getValue());
                 }
+            } else {
+                this.consumable = true;
             }
-            this.best_ask = Optional.of(new PriceQty(ask.getKey(), ask.getValue(), true));
+            if (ask != null) {
+                this.best_ask = Optional.of(new PriceQty(ask.getKey(), ask.getValue(), true));
+            } else {
+                this.best_ask = Optional.empty();
+
+            }
         }
     }
 
+    /**
+     * Consume a top of book price update
+     * caller consumes a price update marking it stale
+     * 
+     * @return true if there's a new unconsumed price update
+     *
+     */
     public boolean consume_update() {
         if (this.consumable) {
             this.consumable = false;
@@ -71,10 +108,22 @@ public class OrderBookTreeMap implements OrderBookInterface {
         return false;
     }
 
+    /**
+     * Return the best bid on the book
+     * 
+     * @return Optional with price-quantity pair
+     *
+     */
     public Optional<PriceQty> getBestBid() {
         return best_bid;
     }
 
+    /**
+     * Return the best ask on the book
+     * 
+     * @return Optional with price-quantity pair
+     *
+     */
     public Optional<PriceQty> getBestAsk() {
         return best_ask;
     }

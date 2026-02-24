@@ -1,5 +1,9 @@
 package com.queueco.app;
 
+/**
+ * Exception thrown if cusotm handling of json string throws up
+ * Used to recover from syntactically broken websocket messages
+ */
 public class JsonProcessingException extends Exception {
     public JsonProcessingException() {
         super();

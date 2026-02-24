@@ -9,22 +9,34 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import com.queueco.app.OrderBook;
+import com.queueco.app.OrderBookInterface;
 import com.queueco.app.PriceQty;
 import com.queueco.app.schemas.v1.ChangeMessageParser;
 
 @Lazy
 @Component("HandlerV1")
 public class Handler extends TextWebSocketHandler {
-    private OrderBook orderBook;
+    private OrderBookInterface orderBook;
     private ChangeMessageParser messageParser;
 
-    public Handler(OrderBook orderBook, ChangeMessageParser changeMessageParser) {
+    /**
+     * Handler Constructor
+     *
+     * @param orderBook An orderbook instance
+     * @return A new handler
+     */
+    public Handler(OrderBookInterface orderBook, ChangeMessageParser changeMessageParser) {
         super();
         this.orderBook = orderBook;
         this.messageParser = changeMessageParser;
     }
 
+    /**
+     * Handle Text Messages, saving state in orderbook
+     *
+     * @param session websocket session
+     * @param message message decoded from utf-8
+     */
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
         // the initial nmessage takes some time to process but after the initial one,

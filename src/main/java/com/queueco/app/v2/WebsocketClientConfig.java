@@ -9,19 +9,19 @@ import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.WebSocketConnectionManager;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
-@Lazy
 @Configuration("WebSocketClientConfigV2")
+@Lazy
 public class WebsocketClientConfig {
+    @Bean("WebsocketClientV2")
     @Lazy
-    @Bean
     WebSocketClient websocketClient() {
         return new StandardWebSocketClient();
     }
 
-    @Lazy
     @Bean("WebSocketConnectionManagerV2")
+    @Lazy
     WebSocketConnectionManager websocketManager(@Qualifier("HandlerV2") Handler handler,
-            WebSocketClient websocketClient) {
+            @Qualifier("WebsocketClientV2") WebSocketClient websocketClient) {
         WebSocketConnectionManager webSocketManager = new WebSocketConnectionManager(websocketClient,
                 handler,
                 connectionURL);
