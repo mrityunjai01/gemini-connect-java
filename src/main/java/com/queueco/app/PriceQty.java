@@ -9,6 +9,10 @@ public class PriceQty {
     private BigDecimal price, qty;
     private boolean isAsk;
 
+    public void setAsk(boolean isAsk) {
+        this.isAsk = isAsk;
+    }
+
     public boolean isAsk() {
         return isAsk;
     }
@@ -36,6 +40,13 @@ public class PriceQty {
         this.price = price;
         this.qty = qty;
         this.isAsk = ask;
+    }
+
+    @Override
+    public String toString() {
+        return "Price: " + this.price.toString() + ", Qty: " + this.qty.toString() + ", Side: " + (this.isAsk ? "ask"
+                : "bid")
+                + "\n";
     }
 
 }

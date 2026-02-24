@@ -2,6 +2,7 @@ package com.queueco.app.v1;
 
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import com.queueco.app.schemas.v1.ChangeMessageParser;
 public class Handler extends TextWebSocketHandler {
     private OrderBookInterface orderBook;
     private ChangeMessageParser messageParser;
+    private Logger logger;
 
     /**
      * Handler Constructor
@@ -25,10 +27,11 @@ public class Handler extends TextWebSocketHandler {
      * @param orderBook An orderbook instance
      * @return A new handler
      */
-    public Handler(OrderBookInterface orderBook, ChangeMessageParser changeMessageParser) {
+    public Handler(OrderBookInterface orderBook, ChangeMessageParser changeMessageParser, Logger missedMessagesLogger) {
         super();
         this.orderBook = orderBook;
         this.messageParser = changeMessageParser;
+        this.logger = missedMessagesLogger;
     }
 
     /**
@@ -41,25 +44,33 @@ public class Handler extends TextWebSocketHandler {
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
         // the initial nmessage takes some time to process but after the initial one,
         // the updates are short messages
-        Iterator<PriceQty> priceUpdates = this.messageParser.parseMessage(message.getPayload());
-        while (priceUpdates.hasNext()) {
-            PriceQty pq = priceUpdates.next();
-            if (pq.isAsk()) {
-                this.orderBook.updateAsk(pq.getPrice(), pq.getQty());
-            } else {
-                this.orderBook.updateBid(pq.getPrice(), pq.getQty());
+        try {
+
+            Iterator<PriceQty> priceUpdates = this.messageParser.parseMessage(message.getPayload());
+            while (priceUpdates.hasNext()) {
+                PriceQty pq = priceUpdates.next();
+                if (pq.isAsk()) {
+                    this.orderBook.updateAsk(pq.getPrice(), pq.getQty());
+                } else {
+                    this.orderBook.updateBid(pq.getPrice(), pq.getQty());
+                }
             }
-        }
 
-        if (this.orderBook.consume_update()) {
-            Optional<PriceQty> best_bid = orderBook.getBestBid();
-            Optional<PriceQty> best_ask = orderBook.getBestAsk();
+            if (this.orderBook.consume_update()) {
+                Optional<PriceQty> best_bid = orderBook.getBestBid();
+                Optional<PriceQty> best_ask = orderBook.getBestAsk();
 
-            if (best_bid.isPresent() && best_ask.isPresent()) {
-                System.out.println(String.format("%s %s - %s %s", best_bid.get().getPrice(), best_bid.get().getQty(),
-                        best_ask.get().getPrice(), best_ask.get().getQty()));
+                if (best_bid.isPresent() && best_ask.isPresent()) {
+                    System.out
+                            .println(String.format("%s %s - %s %s", best_bid.get().getPrice(), best_bid.get().getQty(),
+                                    best_ask.get().getPrice(), best_ask.get().getQty()));
 
+                }
             }
+        } catch (Exception e) {
+            System.out.println(message.getPayload());
+
+            this.logger.severe(message.getPayload());
         }
 
     }

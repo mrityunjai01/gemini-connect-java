@@ -9,4 +9,20 @@ public class Subscription {
         this.symbols = symbols;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String[] getSymbols() {
+        return symbols;
+    }
+
+    public void setSymbols(String[] symbols) {
+        this.symbols = symbols;
+    }
+
 }

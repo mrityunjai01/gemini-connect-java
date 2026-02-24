@@ -4,6 +4,14 @@ public class InitialMessageSchema {
     private final String type;
     private final Subscription[] subscriptions;
 
+    public String getType() {
+        return type;
+    }
+
+    public Subscription[] getSubscriptions() {
+        return subscriptions;
+    }
+
     public InitialMessageSchema(String type, Subscription[] subscriptions) {
         this.type = type;
         this.subscriptions = subscriptions;

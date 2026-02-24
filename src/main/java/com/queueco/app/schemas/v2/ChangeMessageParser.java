@@ -1,4 +1,4 @@
-package com.queueco.app.schemas.v1;
+package com.queueco.app.schemas.v2;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -17,12 +17,11 @@ import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.json.JsonFactory;
 
 /**
- * Parses change messages from v1 API.
+ * Parses change messages from v2 API.
  * Ignores any messages which are not change based and logs them into an error
  * log
  */
-
-@Component("changeMessageParserV1")
+@Component("changeMessageParserV2")
 public class ChangeMessageParser {
     private JsonFactory jsonFactory;
     private ArrayList<PriceQty> updates;
